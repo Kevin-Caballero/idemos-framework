@@ -1,0 +1,113 @@
+@startuml
+title IDemos - ERD (PostgreSQL)
+
+hide circle
+skinparam linetype ortho
+
+entity "users" as users {
+  *id : int <<PK>>
+  --
+  email : varchar <<UQ>>
+  password_hash : varchar
+  created_at : timestamp
+  last_login_at : timestamp
+}
+
+entity "initiatives" as initiatives {
+  *id : int <<PK>>
+  --
+  source : varchar  <<e.g., CONGRESO>>
+  legislature : varchar
+  type : varchar  <<Proyecto|Proposicion>>
+  expediente : varchar <<UQ>>
+  title : text
+  author : varchar
+  procedure_type : varchar  <<Urgente|Ordinaria?>>
+  current_status : varchar
+  committee : varchar
+  presented_at : date
+  qualified_at : date
+  closed_at : date <<nullable>>
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "initiative_steps" as steps {
+  *id : int <<PK>>
+  --
+  initiative_id : int <<FK>>
+  step_type : varchar <<Publicacion|Enmiendas|Comision|Pleno...>>
+  description : text
+  start_date : date <<nullable>>
+  end_date : date <<nullable>>
+  order_index : int
+}
+
+entity "initiative_links" as links {
+  *id : int <<PK>>
+  --
+  initiative_id : int <<FK>>
+  link_type : varchar <<BOCG|DS|OTRO>>
+  url : text
+  label : varchar <<nullable>>
+}
+
+entity "ai_summaries" as summaries {
+  *id : int <<PK>>
+  --
+  initiative_id : int <<FK, UQ>>
+  model : varchar
+  prompt_version : varchar
+  summary_text : text
+  source_hash : varchar
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "votes" as votes {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  initiative_id : int <<FK>>
+  choice : varchar <<SI|NO|ABST>>
+  created_at : timestamp
+  --
+  <<UQ(user_id, initiative_id)>>
+}
+
+entity "follows" as follows {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  initiative_id : int <<FK>>
+  created_at : timestamp
+  --
+  <<UQ(user_id, initiative_id)>>
+}
+
+entity "notifications" as notifications {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  initiative_id : int <<FK>>
+  type : varchar <<STATUS_CHANGE|NEW_SUMMARY|OTHER>>
+  title : varchar
+  body : text
+  is_read : boolean
+  created_at : timestamp
+}
+
+users ||--o{ votes : "casts"
+initiatives ||--o{ votes : "receives"
+
+users ||--o{ follows : "follows"
+initiatives ||--o{ follows : "is followed"
+
+users ||--o{ notifications : "has"
+initiatives ||--o{ notifications : "about"
+
+initiatives ||--o{ steps : "has"
+initiatives ||--o{ links : "has"
+initiatives ||--|| summaries : "has (0..1)"
+
+@enduml

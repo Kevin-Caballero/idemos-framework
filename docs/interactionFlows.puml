@@ -1,0 +1,101 @@
+@startuml
+title IDemos - Flujos de interacción (A–E) en un solo diagrama
+
+skinparam backgroundColor white
+skinparam activity {
+  BackgroundColor #F7F7F7
+  BorderColor #333333
+  FontColor #111111
+}
+skinparam noteBackgroundColor #FFF8DC
+skinparam noteBorderColor #999999
+
+start
+:INICIO APP;
+
+
+partition "Flujo A: Consultar desde Inicio" {
+  :Ir a "Inicio";
+  :Seleccionar tipo (Proyectos / Proposiciones);
+  :Scroll en el feed;
+
+  if ("¿Abrir una iniciativa?") then (Sí)
+    :Abrir "Detalle de iniciativa";
+    :Ver estado/fase y fechas;
+    :Leer resumen (IA);
+    :Ver fuentes oficiales (opcional);
+    :Volver atrás a Inicio;
+  else (No)
+    :Seguir explorando en Inicio;
+  endif
+}
+
+
+partition "Flujo B: Buscar y filtrar" {
+  :Ir a "Buscar";
+  :Escribir texto (título/expediente/tema);
+
+  if ("¿Abrir filtros?") then (Sí)
+    :Abrir "Filtros";
+    :Seleccionar tipo, estado/fase, fechas (comisión opcional);
+
+    if ("¿Aplicar filtros?") then (Aplicar)
+      :Mostrar resultados filtrados;
+    else (Cancelar)
+      :Volver a Buscar;
+      :Mostrar resultados por texto;
+    endif
+  else (No)
+    :Mostrar resultados por texto;
+  endif
+
+  if ("¿Abrir una iniciativa?") then (Sí)
+    :Abrir "Detalle de iniciativa";
+    :Volver a resultados;
+  else (No)
+    :Refinar búsqueda o cambiar filtros;
+  endif
+}
+
+
+partition "Flujo C: Votar en una iniciativa" {
+  :Entrar en "Detalle de iniciativa";
+  :Pulsa votar (Sí / No / Abstención);
+  :Registrar voto;
+  :Mostrar resultados agregados ciudadanía;
+  
+  if ("¿Existe voto oficial del Congreso?") then (Sí)
+    :Mostrar resultados oficiales;
+    :Mostrar comparación Ciudadanía vs Congreso;
+  else (No)
+    :Ocultar sección voto oficial;
+  endif
+}
+
+partition "Flujo D: Seguir iniciativa y Notificaciones" {
+  :Entrar en "Detalle de iniciativa";
+  :Pulsa "Seguir iniciativa";
+  :Guardar seguimiento;
+
+  :Ir a "Notificaciones";
+
+  if ("¿Hay notificaciones?") then (Sí)
+    :Seleccionar notificación;
+    :Abrir "Detalle de iniciativa";
+  else (No)
+    :Mostrar estado vacío;
+  endif
+}
+
+
+partition "Flujo E: Ajustes y cuenta" {
+  :Ir a "Ajustes";
+  :Ver cuenta / Cerrar sesión (opcional);
+  :Preferencias: Notificaciones (toggle);
+  :Preferencias: Accesibilidad (tamaño texto);
+  :Preferencias: Idioma (si aplica);
+  :Acerca de IDemos;
+}
+
+stop
+@enduml

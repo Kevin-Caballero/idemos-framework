@@ -1,0 +1,44 @@
+# docker/Dockerfile.ai
+# Multi-stage build for the AI NestJS service.
+# Build context: framework root (../  relative to docker/)
+
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+COPY packages/common/package.json   packages/common/
+COPY services/ai/package.json       services/ai/
+
+RUN cd packages/common && npm install --ignore-scripts
+RUN cd services/ai     && npm install --ignore-scripts
+
+COPY packages/common/src            packages/common/src
+COPY packages/common/tsconfig.json  packages/common/
+
+RUN cd packages/common && npm run build
+
+COPY services/ai/src              services/ai/src
+COPY services/ai/tsconfig.json    services/ai/
+COPY services/ai/tsconfig.build.json services/ai/
+COPY services/ai/nest-cli.json    services/ai/
+
+RUN cd services/ai && npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+
+RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
+
+COPY packages/common/package.json       packages/common/
+COPY --from=builder /app/packages/common/dist packages/common/dist
+
+COPY services/ai/package.json       services/ai/
+COPY --from=builder /app/services/ai/dist  services/ai/dist
+
+RUN cd packages/common && npm install --omit=dev --ignore-scripts
+RUN cd services/ai     && npm install --omit=dev --ignore-scripts
+
+USER nestjs
+ENV NODE_ENV=production
+EXPOSE 3003
+
+CMD ["node", "services/ai/dist/main.js"]

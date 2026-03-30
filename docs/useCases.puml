@@ -1,0 +1,27 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Usuario" as User
+
+rectangle "IDemos" {
+  usecase "CU-001\nIniciar sesión / Registrarse" as UC1
+  usecase "CU-002\nVer feed de iniciativas" as UC2
+  usecase "CU-003\nBuscar y filtrar iniciativas" as UC3
+  usecase "CU-004\nVer detalle de iniciativa" as UC4
+  usecase "CU-005\nVotar iniciativa (Sí/No/Abst)" as UC5
+  usecase "CU-006\nSeguir iniciativa" as UC6
+  usecase "CU-007\nVer notificaciones" as UC7
+  usecase "CU-008\nGestionar ajustes" as UC8
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+
+@enduml

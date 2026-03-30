@@ -1,0 +1,26 @@
+# ─── Cloned external repositories (managed by npm run pull) ──────────────────
+# These are independent git repos — do NOT commit them inside the framework
+/services/
+/packages/common/
+
+# ─── Node ─────────────────────────────────────────────────────────────────────
+node_modules/
+
+# ─── Build outputs ────────────────────────────────────────────────────────────
+dist/
+/packages/migrations/dist/
+
+# ─── Environment ──────────────────────────────────────────────────────────────
+.env
+
+# ─── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── IDE ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*

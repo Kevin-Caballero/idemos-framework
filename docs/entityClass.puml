@@ -1,0 +1,356 @@
+@startuml IDemos_MVP_ClassDiagram
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor White
+  BorderColor #333333
+  ArrowColor #555555
+  FontSize 12
+}
+skinparam package {
+  BorderColor #666666
+  FontSize 13
+  FontStyle bold
+}
+
+package "ENTITIES" #FDFDE0 {
+
+  enum VoteChoice {
+    SI
+    NO
+    ABST
+  }
+
+  enum NotificationType {
+    STATUS_CHANGE
+    NEW_SUMMARY
+    OTHER
+  }
+
+  enum InitiativeType {
+    Proyecto
+    Proposicion
+  }
+
+  enum LinkType {
+    BOCG
+    DS
+    OTHER
+  }
+
+  class User {
+    + id: uuid
+    + email: string
+    + passwordHash: string
+    + createdAt: Date
+    + lastLoginAt: Date
+  }
+
+  class Initiative {
+    + id: uuid
+    + legislature: string
+    + type: InitiativeType
+    + expediente: string
+    + title: string
+    + author: string
+    + procedureType: string
+    + currentStatus: string
+    + committee: string
+    + presentedAt: Date
+    + qualifiedAt: Date
+    + closedAt: Date
+    + createdAt: Date
+    + updatedAt: Date
+  }
+
+  class InitiativeStep {
+    + id: uuid
+    + stepType: string
+    + description: string
+    + startDate: Date
+    + endDate: Date
+    + orderIndex: number
+  }
+
+  class InitiativeLink {
+    + id: uuid
+    + linkType: LinkType
+    + url: string
+    + label: string
+  }
+
+  class AiSummary {
+    + id: uuid
+    + model: string
+    + promptVersion: string
+    + summaryText: string
+    + sourceHash: string
+    + createdAt: Date
+    + updatedAt: Date
+  }
+
+  class Vote {
+    + id: uuid
+    + choice: VoteChoice
+    + createdAt: Date
+  }
+
+  class Follow {
+    + id: uuid
+    + createdAt: Date
+  }
+
+  class Notification {
+    + id: uuid
+    + type: NotificationType
+    + title: string
+    + body: string
+    + isRead: boolean
+    + createdAt: Date
+  }
+
+  Initiative "1" *-- "0..*" InitiativeStep   : has steps >
+  Initiative "1" *-- "0..*" InitiativeLink   : has links >
+  Initiative "1" *-- "0..1" AiSummary        : summarised by >
+
+  User       "1" --> "0..*" Vote             : casts >
+  Initiative "1" --> "0..*" Vote             : receives >
+
+  User       "1" --> "0..*" Follow           : follows >
+  Initiative "1" --> "0..*" Follow           : followed by >
+
+  User       "1" --> "0..*" Notification     : receives >
+  Initiative "1" --> "0..*" Notification     : triggers >
+}
+
+
+package "AUTH" #E8F5E9 {
+
+  class AuthController {
+    + register(dto): Promise
+    + login(dto): Promise
+    + refresh(dto): Promise
+  }
+
+  class AuthService {
+    + register(dto): Promise
+    + validateCredentials(email, pass): Promise
+    + generateTokens(user): TokenPair
+    + refreshToken(token): TokenPair
+  }
+
+  class UsersService {
+    + findByEmail(email): Promise
+    + findById(id): Promise
+    + create(dto): Promise
+  }
+
+  class JwtStrategy {
+    + validate(payload): Promise
+  }
+
+  class JwtAuthGuard {
+    + canActivate(ctx): boolean
+  }
+
+  AuthController --> AuthService   : uses
+  AuthService    --> UsersService  : uses
+  JwtAuthGuard   --> JwtStrategy   : uses
+  AuthController ..> JwtAuthGuard  : guarded by
+
+  UsersService   ..> User          : <<repository>>
+}
+
+
+package "BACKEND" #E3F2FD {
+
+  class InitiativesController {
+    + findAll(filters): Promise
+    + findOne(id): Promise
+    + findSummary(id): Promise
+  }
+
+  class InitiativesService {
+    + findAll(filters): Promise
+    + findOne(id): Promise
+    + getSummary(id): Promise
+  }
+
+  class VotesController {
+    + castVote(dto): Promise
+    + getUserVote(initiativeId): Promise
+  }
+
+  class VotesService {
+    + castVote(userId, initiativeId, choice): Promise
+    + findByUser(userId): Promise
+    + getStats(initiativeId): VoteStats
+  }
+
+  class FollowsController {
+    + follow(initiativeId): Promise
+    + unfollow(initiativeId): Promise
+    + getUserFollows(): Promise
+  }
+
+  class FollowsService {
+    + follow(userId, initiativeId): Promise
+    + unfollow(userId, initiativeId): Promise
+    + findByUser(userId): Promise
+  }
+
+  class NotificationsController {
+    + getUserNotifications(): Promise
+    + markAsRead(id): Promise
+  }
+
+  class NotificationsService {
+    + findByUser(userId): Promise
+    + markAsRead(userId, id): Promise
+    + dispatch(userId, initiativeId, type): Promise
+  }
+
+  InitiativesController   --> InitiativesService   : uses
+  VotesController         --> VotesService           : uses
+  FollowsController       --> FollowsService        : uses
+  NotificationsController --> NotificationsService   : uses
+
+  InitiativesService  ..> Initiative    : <<repository>>
+  InitiativesService  ..> AiSummary     : <<repository>>
+  VotesService        ..> Vote          : <<repository>>
+  FollowsService      ..> Follow        : <<repository>>
+  NotificationsService ..> Notification : <<repository>>
+
+  VotesService  --> NotificationsService : notifies on vote
+  FollowsService --> NotificationsService : notifies on status change
+}
+
+
+package "ETL" #FFF3E0 {
+
+  class EtlScheduler <<Cron>> {
+    + runDailyIngestion(): void
+  }
+
+  class IngestionService {
+    + ingest(source): Promise
+    + upsertInitiative(raw): Promise
+    + upsertSteps(initiativeId, raw): Promise
+  }
+
+  class CongressIngestor {
+    + fetchInitiatives(since): Promise
+    + fetchSteps(expediente): Promise
+  }
+
+  class BoeIngestor <<optional>> {
+    + fetchPublications(since): Promise
+  }
+
+  EtlScheduler     --> IngestionService : triggers
+  IngestionService --> CongressIngestor : uses
+  IngestionService ..> BoeIngestor      : <<optional>>
+
+  IngestionService ..> Initiative     : <<repository>>
+  IngestionService ..> InitiativeStep : <<repository>>
+  IngestionService ..> InitiativeLink : <<repository>>
+
+  ' async event after ingestion triggers AI summary generation
+  IngestionService ..> AiSummaryService : <<event>>
+}
+
+package "AI" #F3E5F5 {
+
+  class AiController {
+    + getSummary(initiativeId): Promise
+    + regenerate(initiativeId): Promise
+  }
+
+  class AiSummaryService {
+    + getOrGenerate(initiativeId): Promise
+    + generate(initiative): Promise
+    + isFresh(summary, sourceHash): boolean
+  }
+
+  class LlmClient {
+    + complete(prompt): Promise
+  }
+
+  AiController     --> AiSummaryService : uses
+  AiSummaryService --> LlmClient        : calls
+
+  AiSummaryService ..> Initiative : <<repository>>
+  AiSummaryService ..> AiSummary  : <<repository>>
+}
+
+package "GATEWAY" #FCE4EC {
+
+  class BffController {
+    + getFeed(filters): Promise
+    + getInitiativeDetail(id): Promise
+    + castVote(dto): Promise
+    + toggleFollow(id): Promise
+    + getNotifications(): Promise
+  }
+
+  class GatewayService {
+    + aggregateFeed(filters): Promise
+    + aggregateDetail(id): Promise
+    + forwardVote(dto): Promise
+    + forwardFollow(id, action): Promise
+    + forwardNotifications(userId): Promise
+  }
+
+  class AuthProxyGuard {
+    + canActivate(ctx): boolean
+  }
+
+  BffController --> GatewayService : uses
+  BffController ..> AuthProxyGuard : guarded by
+
+  GatewayService ..> AuthController       : <<HTTP /auth>>
+  GatewayService ..> InitiativesController : <<HTTP /initiatives>>
+  GatewayService ..> VotesController       : <<HTTP /votes>>
+  GatewayService ..> AiController          : <<HTTP /summaries>>
+}
+
+package "APP" #E0F7FA {
+
+  class MobileApp {
+  }
+
+  class HomeScreen {
+    + loadFeed(): void
+  }
+
+  class SearchScreen {
+    + search(query): void
+  }
+
+  class DetailScreen {
+    + loadInitiative(id): void
+    + vote(choice): void
+    + toggleFollow(): void
+  }
+
+  class NotificationsScreen {
+    + loadNotifications(): void
+    + markRead(id): void
+  }
+
+  class SettingsScreen {
+    + updateProfile(): void
+    + logout(): void
+  }
+
+  MobileApp *-- HomeScreen
+  MobileApp *-- SearchScreen
+  MobileApp *-- DetailScreen
+  MobileApp *-- NotificationsScreen
+  MobileApp *-- SettingsScreen
+
+  MobileApp ..> BffController : <<HTTPS REST>>
+}
+
+@enduml

@@ -1,0 +1,40 @@
+{
+  "name": "idemos-framework",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "IDemos — framework orchestrator (TFG de Ingeniería Informática)",
+  "author": "Kevin Caballero",
+  "license": "ISC",
+  "scripts": {
+    "pull": "tsx scripts/pull.ts",
+    "prepare": "tsx scripts/prepare.ts",
+    "build": "tsx scripts/build.ts",
+    "start": "tsx scripts/start.ts",
+    "dev": "tsx scripts/dev.ts",
+    "db:down": "tsx scripts/db-down.ts",
+    "db:prepare": "tsx scripts/db-prepare.ts",
+    "db:up": "tsx scripts/db-up.ts"
+  },
+  "repos": {
+    "services": {
+      "ai": "https://github.com/Kevin-Caballero/idemos-ai.git",
+      "app": "https://github.com/Kevin-Caballero/idemos-app.git",
+      "auth": "https://github.com/Kevin-Caballero/idemos-auth.git",
+      "backend": "https://github.com/Kevin-Caballero/idemos-backend.git",
+      "etl": "https://github.com/Kevin-Caballero/idemos-etl.git",
+      "gateway": "https://github.com/Kevin-Caballero/idemos-gateway.git"
+    },
+    "packages": {
+      "common": "https://github.com/Kevin-Caballero/idemos-common.git"
+    }
+  },
+  "devDependencies": {
+    "@inquirer/prompts": "^7.5.2",
+    "@types/node": "^22.0.0",
+    "chalk": "^5.4.1",
+    "execa": "^9.5.2",
+    "tsx": "^4.19.3",
+    "typescript": "^6.0.2"
+  }
+}

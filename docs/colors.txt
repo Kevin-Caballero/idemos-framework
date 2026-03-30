@@ -1,0 +1,4 @@
+Primario: #5C6CFA
+Secundario: #f7a199 #FF7A6E
+Terciario: #BFD7FF
+

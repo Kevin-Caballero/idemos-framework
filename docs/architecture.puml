@@ -1,0 +1,117 @@
+@startuml IDemos_Architecture
+
+top to bottom direction
+
+skinparam backgroundColor #FAFAFA
+skinparam componentStyle rectangle
+skinparam defaultFontSize 12
+skinparam defaultFontName Arial
+
+skinparam rectangle {
+  BorderColor #555555
+  FontStyle bold
+}
+skinparam component {
+  BackgroundColor White
+  BorderColor #777777
+}
+skinparam database {
+  BackgroundColor #FFFDE7
+  BorderColor #F9A825
+}
+skinparam queue {
+  BackgroundColor #F3E5F5
+  BorderColor #7B1FA2
+}
+skinparam cloud {
+  BackgroundColor #E8F5E9
+  BorderColor #388E3C
+}
+skinparam note {
+  BackgroundColor #FFFDE7
+  BorderColor #BDBDBD
+}
+skinparam frame {
+  BackgroundColor #F0F4FF
+  BorderColor #1565C0
+  BorderThickness 2
+}
+
+title IDemos - System Architecture\n<size:11></size>
+
+rectangle "CLIENT  <<React Native / Expo>>" #E0F7FA {
+  component [MobileApp\n<size:10>Home · Search · Detail\nNotifications · Settings] as APP
+}
+
+frame "Docker Compose  <<docker-compose.yml>>" {
+
+  rectangle "gateway : 3000  <<BFF>>" #FCE4EC {
+    component [BffController\n<size:10>single HTTP entry point</size>] as BffCtrl
+    component [GatewayService\n<size:10>publishes to RabbitMQ\nawaits reply queue</size>] as GwSvc
+    component [AuthProxyGuard\n<size:10>validates JWT locally</size>] as APGuard
+    BffCtrl -down-> GwSvc   : delegates
+    BffCtrl ..> APGuard      : every request
+  }
+
+  queue "rabbitmq : 5672\n<size:10>exchanges: auth · backend · etl · ai</size>" as RMQ
+
+  rectangle "auth " #E8F5E9 {
+    component [AuthService\n<size:10>register · login\nrefresh · JWT sign ] as AuthSvc
+  }
+
+  rectangle "backend " #DCEEFB {
+    component [InitiativesService] as InitSvc
+    component [VotesService] as VoteSvc
+    component [FollowsService] as FollowSvc
+    component [NotificationsService] as NotifSvc
+    VoteSvc   -down-> NotifSvc : dispatch
+    FollowSvc -down-> NotifSvc : dispatch
+  }
+
+  rectangle "ai " #F3E5F5 {
+    component [AiSummaryService\n<size:10>getOrGenerate · isFresh</size>] as AISvc
+    component [LlmClient\n<size:10>wraps LLM HTTP API</size>] as LLMClient
+    AISvc -down-> LLMClient : prompt
+  }
+
+  rectangle "etl " #FFF3E0 {
+    component [EtlScheduler\n<size:10>@Cron daily</size>] as Scheduler
+    component [IngestionService\n+ CongressIngestor] as Ingestor
+    Scheduler -down-> Ingestor : triggers
+  }
+
+  database "postgres : 5432\n<size:10>shared DB (MVP)</size>" as DB
+
+}
+
+cloud "Congreso.es\nOpenData API" as CongressAPI
+cloud "OpenAI / LLM API" as LLMAPI
+
+
+APP -down-> BffCtrl : HTTPS :3000
+
+GwSvc -down-> RMQ : publish request
+RMQ -up-> GwSvc   : reply queue
+
+RMQ -down-> AuthSvc  : auth.cmd
+RMQ -down-> InitSvc  : initiatives.query
+RMQ -down-> VoteSvc  : votes.cmd
+RMQ -down-> AISvc    : ai.query
+
+Ingestor -up-> RMQ : initiative.upserted
+RMQ -down-> AISvc  : initiative.upserted
+
+AuthSvc  -down-> DB : TypeORM
+InitSvc  -down-> DB : TypeORM
+VoteSvc  -[hidden]down-> NotifSvc
+NotifSvc -down-> DB : TypeORM
+AISvc    -down-> DB : TypeORM
+Ingestor -down-> DB : TypeORM
+
+Ingestor  -down-> CongressAPI : HTTP fetch
+LLMClient -down-> LLMAPI      : HTTP API
+
+DB -[hidden]down-> CongressAPI
+DB -[hidden]down-> LLMAPI
+
+@enduml
