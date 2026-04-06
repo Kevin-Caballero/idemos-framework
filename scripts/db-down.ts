@@ -40,9 +40,7 @@ async function main(): Promise<void> {
   await execa("docker", ["volume", "rm", "--force", "idemos-dev_pgdata_dev"], {
     stdio: "pipe",
     cwd: rootDir,
-  }).catch(() => {
-    /* volume may not exist — ignore */
-  });
+  }).catch(() => {});
 
   console.log(chalk.red.bold("\n  Volumes removed. All data deleted.\n"));
 }

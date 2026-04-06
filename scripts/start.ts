@@ -30,9 +30,7 @@ function setupShutdown(): void {
     for (const proc of spawned) {
       try {
         proc.kill("SIGTERM");
-      } catch {
-        /* already dead */
-      }
+      } catch {}
     }
     setTimeout(() => process.exit(0), 2_000);
   });
@@ -124,9 +122,7 @@ async function main(): Promise<void> {
         if (line.trim()) process.stderr.write(`  ${prefix}  ${line}\n`);
       }
     });
-    proc.catch(() => {
-      /* handled via SIGINT */
-    });
+    proc.catch(() => {});
   }
 
   console.log(
@@ -134,9 +130,7 @@ async function main(): Promise<void> {
       `  ${selected.length} service(s) running. Press Ctrl+C to stop.\n`,
     ),
   );
-  await new Promise(() => {
-    /* keep process alive until SIGINT */
-  });
+  await new Promise(() => {});
 }
 
 main().catch((err: Error) => {

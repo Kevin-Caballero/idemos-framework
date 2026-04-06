@@ -1,6 +1,4 @@
-# IDemos — Dev Infrastructure (postgres + rabbitmq only)
-# NestJS services run locally with hot-reload via: npm run dev
-# Usage: docker compose -f docker/docker-compose.dev.yml up -d
+# IDemos — Dev Infrastructure (postgres + rabbitmq)
 
 name: idemos-dev
 
