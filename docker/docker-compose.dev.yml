@@ -38,6 +38,38 @@ services:
       retries: 15
       start_period: 15s
 
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_dev:/root/.ollama
+    environment:
+      AI_MODEL: ${AI_MODEL:-llama3.2}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        /bin/ollama serve &
+        echo 'Waiting for Ollama server...'
+        until /bin/ollama list >/dev/null 2>&1; do sleep 1; done
+        if /bin/ollama list | grep -q "$$AI_MODEL"; then
+          echo "Model $$AI_MODEL already present."
+        else
+          echo "Pulling model $$AI_MODEL..."
+          /bin/ollama pull $$AI_MODEL
+          echo 'Model ready.'
+        fi
+        wait
+    healthcheck:
+      test: ["CMD-SHELL", "/bin/ollama list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
 volumes:
   pgdata_dev:
     name: idemos_pgdata_dev
+  ollama_dev:
+    name: idemos_ollama_dev

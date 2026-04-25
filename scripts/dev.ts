@@ -6,6 +6,25 @@ import { existsSync, readFileSync, writeFileSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
+function loadRootEnv(rootDir: string): Record<string, string> {
+  const envPath = join(rootDir, ".env");
+  if (!existsSync(envPath)) return {};
+  const vars: Record<string, string> = {};
+  for (const line of readFileSync(envPath, "utf-8").split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const idx = trimmed.indexOf("=");
+    if (idx === -1) continue;
+    const key = trimmed.slice(0, idx).trim();
+    const value = trimmed
+      .slice(idx + 1)
+      .trim()
+      .replace(/^["']|["']$/g, "");
+    vars[key] = value;
+  }
+  return vars;
+}
+
 interface Repos {
   services: Record<string, string>;
   packages: Record<string, string>;
@@ -26,23 +45,29 @@ const SERVICE_COLORS: Record<string, (s: string) => string> = {
 };
 
 async function startInfra(): Promise<void> {
+  const env = loadRootEnv(rootDir);
+  const useGpu = (env.USE_GPU ?? process.env.USE_GPU) === "true";
+
+  const composeFiles = ["docker/docker-compose.dev.yml"];
+  if (useGpu) composeFiles.push("docker/docker-compose.dev.gpu.yml");
+
+  const composeArgs = [
+    "compose",
+    ...composeFiles.flatMap((f) => ["-f", f]),
+    "up",
+    "-d",
+    "--remove-orphans",
+  ];
+
   console.log(
-    chalk.blue("\n  Starting dev infrastructure (postgres + rabbitmq)…"),
+    chalk.blue(
+      `\n  Starting dev infrastructure${useGpu ? " (GPU mode)" : ""}…`,
+    ),
   );
   try {
-    await execa(
-      "docker",
-      [
-        "compose",
-        "-f",
-        "docker/docker-compose.dev.yml",
-        "up",
-        "-d",
-        "--remove-orphans",
-      ],
-      { stdio: "inherit", cwd: rootDir },
-    );
+    await execa("docker", composeArgs, { stdio: "inherit", cwd: rootDir });
     console.log(chalk.green("  Infrastructure ready.\n"));
+    await waitForOllamaModel(env.AI_MODEL ?? "llama3.2");
   } catch {
     console.error(
       chalk.red("  Failed to start Docker infrastructure. Is Docker running?"),
@@ -50,6 +75,42 @@ async function startInfra(): Promise<void> {
     process.exit(1);
   }
 }
+
+async function waitForOllamaModel(model: string): Promise<void> {
+  const ollamaUrl = loadRootEnv(rootDir).OLLAMA_URL ?? "http://localhost:11434";
+  const spinner = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+  let tick = 0;
+
+  process.stdout.write(chalk.blue(`  Waiting for Ollama model '${model}'…`));
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    try {
+      const res = await fetch(`${ollamaUrl}/api/tags`);
+      if (res.ok) {
+        const data = (await res.json()) as { models: Array<{ name: string }> };
+        const modelName = model.includes(":") ? model : `${model}:latest`;
+        const found = data.models?.some(
+          (m) => m.name === modelName || m.name.startsWith(`${model}:`),
+        );
+        if (found) {
+          process.stdout.write(
+            `\r${chalk.green(`  ✓ Ollama model '${model}' ready.`)}            \n\n`,
+          );
+          return;
+        }
+      }
+    } catch {
+      // server not ready yet
+    }
+
+    process.stdout.write(
+      `\r  ${spinner[tick++ % spinner.length]} ${chalk.blue(`Waiting for Ollama model '${model}'…`)}`,
+    );
+    await new Promise((r) => setTimeout(r, 2_000));
+  }
+}
+
 async function runSeeds(): Promise<void> {
   console.log(chalk.blue("  Running dev seeds\u2026"));
   try {
@@ -90,6 +151,7 @@ async function runProcess(selected: string[]): Promise<void> {
     const proc = execa("npm", ["run", "start:dev"], {
       cwd: dir,
       stdio: "pipe",
+      env: { ...process.env, ...loadRootEnv(rootDir), NODE_ENV: "development" },
     });
     spawned.push(proc);
 
