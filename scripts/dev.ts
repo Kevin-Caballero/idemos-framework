@@ -107,38 +107,86 @@ async function startInfra(): Promise<void> {
   await waitForPostgres();
 }
 
-async function waitForOllamaModel(model: string): Promise<void> {
-  const ollamaUrl = loadRootEnv(rootDir).OLLAMA_URL ?? "http://localhost:11434";
+async function isOllamaModelPresent(
+  ollamaUrl: string,
+  model: string,
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${ollamaUrl}/api/tags`);
+    if (!res.ok) return false;
+    const data = (await res.json()) as { models: Array<{ name: string }> };
+    const modelName = model.includes(":") ? model : `${model}:latest`;
+    return (
+      data.models?.some(
+        (m) => m.name === modelName || m.name.startsWith(`${model}:`),
+      ) ?? false
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function waitForOllamaReady(
+  ollamaUrl: string,
+  maxTries = 30,
+  intervalMs = 2_000,
+): Promise<void> {
   const spinner = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
   let tick = 0;
-
-  process.stdout.write(chalk.blue(`  Waiting for Ollama model '${model}'…`));
-
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+  process.stdout.write(chalk.blue("  Waiting for Ollama"));
+  for (let i = 0; i < maxTries; i++) {
     try {
       const res = await fetch(`${ollamaUrl}/api/tags`);
       if (res.ok) {
-        const data = (await res.json()) as { models: Array<{ name: string }> };
-        const modelName = model.includes(":") ? model : `${model}:latest`;
-        const found = data.models?.some(
-          (m) => m.name === modelName || m.name.startsWith(`${model}:`),
-        );
-        if (found) {
-          process.stdout.write(
-            `\r${chalk.green(`  ✓ Ollama model '${model}' ready.`)}            \n\n`,
-          );
-          return;
-        }
+        process.stdout.write(chalk.green(" ready\n"));
+        return;
       }
     } catch {
-      // server not ready yet
+      // not up yet
     }
-
     process.stdout.write(
-      `\r  ${spinner[tick++ % spinner.length]} ${chalk.blue(`Waiting for Ollama model '${model}'…`)}`,
+      `\r  ${spinner[tick++ % spinner.length]} ${chalk.blue("Waiting for Ollama")}`,
     );
-    await new Promise((r) => setTimeout(r, 2_000));
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+  throw new Error("Ollama did not become ready — check the container logs.");
+}
+
+async function ensureOllamaModel(model: string): Promise<void> {
+  const ollamaUrl = loadRootEnv(rootDir).OLLAMA_URL ?? "http://localhost:11434";
+
+  await waitForOllamaReady(ollamaUrl);
+
+  if (await isOllamaModelPresent(ollamaUrl, model)) {
+    console.log(chalk.green(`  ✓ Ollama model '${model}' already present.\n`));
+    return;
+  }
+
+  console.log(chalk.blue(`  Pulling Ollama model '${model}'…`));
+  try {
+    await execa(
+      "docker",
+      [
+        "compose",
+        "-f",
+        COMPOSE_INFRA,
+        "exec",
+        "-T",
+        "ollama",
+        "ollama",
+        "pull",
+        model,
+      ],
+      { stdio: "inherit", cwd: rootDir },
+    );
+    console.log(chalk.green(`  ✓ Ollama model '${model}' ready.\n`));
+  } catch (err: any) {
+    console.error(
+      chalk.red(
+        `  ✗ Failed to pull Ollama model '${model}':\n     ${err.stderr ?? err.message}`,
+      ),
+    );
+    process.exit(1);
   }
 }
 
@@ -277,7 +325,7 @@ async function main(): Promise<void> {
 
   const env = loadRootEnv(rootDir);
   if (env.AI_MODEL) {
-    await waitForOllamaModel(env.AI_MODEL);
+    await ensureOllamaModel(env.AI_MODEL);
   }
 
   const mode = await select<RunMode>({
