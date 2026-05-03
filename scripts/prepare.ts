@@ -1,12 +1,6 @@
 import { execa } from "execa";
 import chalk from "chalk";
-import {
-  copyFileSync,
-  existsSync,
-  readFileSync,
-  readdirSync,
-  statSync,
-} from "node:fs";
+import { copyFileSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface Repos {
@@ -18,65 +12,7 @@ const rootDir = process.cwd();
 const pkg = JSON.parse(readFileSync(join(rootDir, "package.json"), "utf-8"));
 const repos = pkg.repos as Repos;
 
-const ENV_SAMPLE_SUFFIX = /\.(example|sample)$/i;
-const SKIP_SCAN_DIRS = new Set([
-  "node_modules",
-  ".git",
-  "dist",
-  "build",
-  "coverage",
-  ".next",
-  ".expo",
-]);
-
-function collectEnvSampleFiles(dir: string, acc: string[] = []): string[] {
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.isDirectory()) {
-      if (SKIP_SCAN_DIRS.has(entry.name)) continue;
-      collectEnvSampleFiles(join(dir, entry.name), acc);
-      continue;
-    }
-
-    if (!entry.isFile()) continue;
-    if (!entry.name.startsWith(".env")) continue;
-    if (!ENV_SAMPLE_SUFFIX.test(entry.name)) continue;
-    acc.push(join(dir, entry.name));
-  }
-
-  return acc;
-}
-
-function ensureEnvFilesFromSamples(): void {
-  const samples = collectEnvSampleFiles(rootDir);
-  const created: string[] = [];
-
-  for (const samplePath of samples) {
-    const targetPath = samplePath.replace(ENV_SAMPLE_SUFFIX, "");
-    if (existsSync(targetPath)) continue;
-    copyFileSync(samplePath, targetPath);
-    created.push(targetPath);
-  }
-
-  if (created.length > 0) {
-    console.log(
-      `  ${chalk.green("✓")}  ${chalk.bold("env")} — created ${created.length} file(s) from samples`,
-    );
-  }
-}
-
-function ensureServiceEnvFiles(): void {
-  const rootEnvPath = join(rootDir, ".env");
-  const rootEnvExamplePath = join(rootDir, ".env.example");
-
-  let sourcePath: string | null = null;
-  if (existsSync(rootEnvPath)) {
-    sourcePath = rootEnvPath;
-  } else if (existsSync(rootEnvExamplePath)) {
-    sourcePath = rootEnvExamplePath;
-  }
-
-  if (!sourcePath) return;
-
+function ensureServiceEnvFilesFromExamples(): void {
   const nestServices = Object.keys(repos.services ?? {}).filter(
     (name) => name !== "app",
   );
@@ -84,19 +20,22 @@ function ensureServiceEnvFiles(): void {
 
   for (const name of nestServices) {
     const serviceDir = join(rootDir, "services", name);
-    if (!existsSync(serviceDir) || !statSync(serviceDir).isDirectory())
-      continue;
+    if (!existsSync(serviceDir)) continue;
 
+    const serviceEnvExamplePath = join(serviceDir, ".env.example");
     const serviceEnvPath = join(serviceDir, ".env");
-    if (existsSync(serviceEnvPath)) continue;
 
-    copyFileSync(sourcePath, serviceEnvPath);
+    if (!existsSync(serviceEnvExamplePath) || existsSync(serviceEnvPath)) {
+      continue;
+    }
+
+    copyFileSync(serviceEnvExamplePath, serviceEnvPath);
     created.push(`services/${name}/.env`);
   }
 
   if (created.length > 0) {
     console.log(
-      `  ${chalk.green("✓")}  ${chalk.bold("env")} — created ${created.length} service .env file(s)`,
+      `  ${chalk.green("✓")}  ${chalk.bold("env")} — created ${created.length} service .env file(s) from .env.example`,
     );
   }
 }
@@ -143,8 +82,7 @@ async function npmBuild(label: string, dir: string): Promise<void> {
 async function main(): Promise<void> {
   console.log(chalk.bold.blue("\n  IDemos — Install Dependencies\n"));
 
-  ensureEnvFilesFromSamples();
-  ensureServiceEnvFiles();
+  ensureServiceEnvFilesFromExamples();
 
   for (const name of Object.keys(repos.packages ?? {})) {
     await npmInstall(`packages/${name}`, join(rootDir, "packages", name));
