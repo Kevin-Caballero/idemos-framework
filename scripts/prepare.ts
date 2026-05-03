@@ -32,12 +32,36 @@ async function npmInstall(label: string, dir: string): Promise<void> {
   }
 }
 
+async function npmBuild(label: string, dir: string): Promise<void> {
+  if (!existsSync(dir)) {
+    console.log(
+      `  ${chalk.yellow("⚠")}  ${chalk.bold(label)} — not found (run ${chalk.cyan("npm run pull")} first)`,
+    );
+    return;
+  }
+
+  console.log(`  ${chalk.blue("⚙")}  ${chalk.bold(label)} — building…`);
+  try {
+    await execa("npm", ["run", "build"], { cwd: dir, stdio: "pipe" });
+    console.log(`  ${chalk.green("✓")}  ${chalk.bold(label)} — built`);
+  } catch (err: any) {
+    console.error(
+      `  ${chalk.red("✗")}  ${chalk.bold(label)} — build failed:\n     ${err.stderr ?? err.message}`,
+    );
+    process.exitCode = 1;
+  }
+}
+
 async function main(): Promise<void> {
   console.log(chalk.bold.blue("\n  IDemos — Install Dependencies\n"));
 
   for (const name of Object.keys(repos.packages ?? {})) {
     await npmInstall(`packages/${name}`, join(rootDir, "packages", name));
   }
+
+  // @idemos/common exposes declarations from dist/, so it must be built
+  // before services install it as a local file dependency.
+  await npmBuild("packages/common", join(rootDir, "packages", "common"));
 
   await npmInstall(
     "packages/migrations",
