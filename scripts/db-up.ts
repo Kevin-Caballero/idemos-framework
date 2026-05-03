@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const rootDir = process.cwd();
-const COMPOSE_DEV = "docker/docker-compose.dev.yml";
+const COMPOSE_INFRA = "docker/docker-compose.infra.yml";
 
 function loadEnv(): void {
   const envPath = join(rootDir, ".env");
@@ -44,7 +44,7 @@ async function waitForPostgres(
         [
           "compose",
           "-f",
-          COMPOSE_DEV,
+          COMPOSE_INFRA,
           "exec",
           "-T",
           "postgres",
@@ -73,15 +73,6 @@ async function main(): Promise<void> {
 
   loadEnv();
 
-  console.log(chalk.blue("  Starting PostgreSQL container…"));
-  await execa(
-    "docker",
-    ["compose", "-f", COMPOSE_DEV, "up", "-d", "postgres"],
-    { stdio: "inherit", cwd: rootDir },
-  );
-
-  await waitForPostgres();
-
   const migrationsDir = join(rootDir, "packages", "migrations");
   if (!existsSync(migrationsDir)) {
     console.error(
@@ -91,6 +82,14 @@ async function main(): Promise<void> {
     );
     process.exit(1);
   }
+
+  console.log(chalk.blue("  Starting PostgreSQL container…"));
+  await execa(
+    "docker",
+    ["compose", "-f", COMPOSE_INFRA, "up", "-d", "postgres"],
+    { stdio: "inherit", cwd: rootDir },
+  );
+  await waitForPostgres();
 
   console.log(chalk.blue("\n  Running migrations…\n"));
   await execa("npm", ["run", "migration:run"], {

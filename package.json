@@ -9,13 +9,11 @@
   "scripts": {
     "pull": "tsx scripts/pull.ts",
     "prepare": "tsx scripts/prepare.ts",
-    "build": "tsx scripts/build.ts",
-    "start": "tsx scripts/start.ts",
     "dev": "tsx scripts/dev.ts",
-    "db:down": "tsx scripts/db-down.ts",
     "db:prepare": "tsx scripts/db-prepare.ts",
     "db:seed": "tsx scripts/db-seed.ts",
-    "db:up": "tsx scripts/db-up.ts"
+    "db:up": "tsx scripts/db-up.ts",
+    "db:down": "tsx scripts/db-down.ts"
   },
   "repos": {
     "services": {

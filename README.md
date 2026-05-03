@@ -34,7 +34,7 @@ TFG de Ingeniería Informática · Kevin Caballero
 | ---------------------------- | -------- |
 | React                        | 19.1.0   |
 | React Native                 | 0.81.5   |
-| Expo                         | ~54.0.33 |
+| Expo                         | ~54.0.34 |
 | Expo Router                  | ~6.0.23  |
 | NativeWind                   | ^4.2.1   |
 | React Native Reanimated      | ~4.1.1   |
@@ -92,19 +92,16 @@ The rest of the backend services (auth, backend, etl, ai) communicate through Ra
 ## Development
 
 ```bash
+# 0. Install dependencies (only needed once, or after a fresh clone)
+npm i
+
 # 1. Clone all service repos
 npm run pull
 
 # 2. Install all dependencies
 npm run prepare
 
-# 3. Apply database migrations (starts PostgreSQL via Docker)
-npm run db:up
-
-# 4. (Optional) Seed the database
-npm run db:seed
-
-# 5. Start infrastructure (PostgreSQL + RabbitMQ) and all services in watch mode
+# 3. Start infrastructure (PostgreSQL + RabbitMQ) and all services in watch mode
 npm run dev
 ```
 
@@ -115,40 +112,13 @@ To run the mobile app separately:
 ```bash
 cd services/app
 
-# Android
-npm run android
+# Android (emulator or physical device)
+npm run emulator
+npm run mobile
 
 # iOS
 npm run ios
 
 # Web
 npm run web
-```
-
----
-
-## Production
-
-```bash
-# 1. Clone all service repos (if not already done)
-npm run pull
-
-# 2. Install all dependencies
-npm run prepare
-
-# 3. Apply database migrations
-npm run db:up
-
-# 4. Build all NestJS services
-npm run build
-
-# 5. Start all services from compiled output
-npm run start
-```
-
-For the mobile app, generate a production build via Expo:
-
-```bash
-cd services/app
-npx expo build:android   # or build:ios
 ```

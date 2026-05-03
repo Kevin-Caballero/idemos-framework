@@ -3,20 +3,24 @@ import chalk from "chalk";
 import { confirm } from "@inquirer/prompts";
 
 const rootDir = process.cwd();
-const COMPOSE_DEV = "docker/docker-compose.dev.yml";
+const COMPOSE_INFRA = "docker/docker-compose.infra.yml";
 
 async function main(): Promise<void> {
   console.log(chalk.bold.blue("\n  IDemos — DB Down\n"));
 
   console.log(chalk.blue("  Stopping PostgreSQL container…"));
   try {
-    await execa("docker", ["compose", "-f", COMPOSE_DEV, "stop", "postgres"], {
-      stdio: "inherit",
-      cwd: rootDir,
-    });
+    await execa(
+      "docker",
+      ["compose", "-f", COMPOSE_INFRA, "stop", "postgres"],
+      { stdio: "inherit", cwd: rootDir },
+    );
     console.log(chalk.green("  ✓  PostgreSQL stopped.\n"));
-  } catch (err: any) {
-    console.error(chalk.red("  ✗  Failed to stop postgres:"), err.message);
+  } catch (err: unknown) {
+    console.error(
+      chalk.red("  ✗  Failed to stop postgres:"),
+      (err as Error).message,
+    );
     process.exit(1);
   }
 
@@ -33,11 +37,11 @@ async function main(): Promise<void> {
   console.log(chalk.red("\n  Removing container and volumes…"));
   await execa(
     "docker",
-    ["compose", "-f", COMPOSE_DEV, "rm", "--force", "--volumes", "postgres"],
+    ["compose", "-f", COMPOSE_INFRA, "rm", "--force", "--volumes", "postgres"],
     { stdio: "inherit", cwd: rootDir },
   );
 
-  await execa("docker", ["volume", "rm", "--force", "idemos-dev_pgdata_dev"], {
+  await execa("docker", ["volume", "rm", "--force", "idemos_postgres_data"], {
     stdio: "pipe",
     cwd: rootDir,
   }).catch(() => {});
