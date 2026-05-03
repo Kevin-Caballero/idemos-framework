@@ -25,7 +25,8 @@
       "gateway": "https://github.com/Kevin-Caballero/idemos-gateway.git"
     },
     "packages": {
-      "common": "https://github.com/Kevin-Caballero/idemos-common.git"
+      "common": "https://github.com/Kevin-Caballero/idemos-common.git",
+      "migrations": "https://github.com/Kevin-Caballero/idemos-migrations.git"
     }
   },
   "devDependencies": {
