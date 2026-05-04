@@ -1,6 +1,6 @@
 import { execa } from "execa";
 import chalk from "chalk";
-import { copyFileSync, existsSync, readFileSync } from "node:fs";
+import { copyFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface Repos {
@@ -31,6 +31,22 @@ function ensureServiceEnvFilesFromExamples(): void {
 
     copyFileSync(serviceEnvExamplePath, serviceEnvPath);
     created.push(`services/${name}/.env`);
+  }
+
+  // App service uses the pattern `.env.*.example` → `.env.*`
+  const appDir = join(rootDir, "services", "app");
+  if (existsSync(appDir)) {
+    const examples = readdirSync(appDir).filter((f) =>
+      /^\.env(\..+)?\.example$/.test(f),
+    );
+    for (const example of examples) {
+      const target = example.replace(/\.example$/, "");
+      const targetPath = join(appDir, target);
+      if (!existsSync(targetPath)) {
+        copyFileSync(join(appDir, example), targetPath);
+        created.push(`services/app/${target}`);
+      }
+    }
   }
 
   if (created.length > 0) {
