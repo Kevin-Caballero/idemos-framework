@@ -46,6 +46,7 @@ const SERVICE_COLORS: Record<string, (s: string) => string> = {
 
 const COMPOSE_INFRA = "docker/docker-compose.infra.yml";
 const COMPOSE_GPU = "docker/docker-compose.dev.gpu.yml";
+const DEFAULT_AI_MODEL = "gemma3:4b";
 
 async function waitForPostgres(
   maxTries = 30,
@@ -324,9 +325,7 @@ async function main(): Promise<void> {
   await startInfra();
 
   const env = loadRootEnv(rootDir);
-  if (env.AI_MODEL) {
-    await ensureOllamaModel(env.AI_MODEL);
-  }
+  await ensureOllamaModel(env.AI_MODEL ?? DEFAULT_AI_MODEL);
 
   const mode = await select<RunMode>({
     message: "How do you want to run the services?",
