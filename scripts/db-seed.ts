@@ -89,7 +89,7 @@ async function main(): Promise<void> {
     env: {
       ...process.env,
       DB_HOST: process.env.DB_HOST ?? "localhost",
-      DB_PORT: process.env.DB_PORT ?? "5432",
+      DB_PORT: process.env.DB_PORT ?? "15432",
       DB_NAME: process.env.DB_NAME ?? "idemos",
       DB_USER: process.env.DB_USER ?? "postgres",
       DB_PASSWORD: process.env.DB_PASSWORD ?? "postgres",

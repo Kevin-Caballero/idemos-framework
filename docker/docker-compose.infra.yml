@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${DB_PORT:-15432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -17,8 +17,8 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "15672:5672"
+      - "15673:15672"
     restart: unless-stopped
 
   ollama:

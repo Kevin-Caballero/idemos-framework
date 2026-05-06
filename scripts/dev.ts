@@ -219,7 +219,7 @@ async function runProcess(selected: string[]): Promise<void> {
   );
   console.log(
     chalk.gray(
-      "  Tip: RabbitMQ management UI → http://localhost:15672  (guest/guest)\n",
+      "  Tip: RabbitMQ management UI → http://localhost:15673  (guest/guest)\n",
     ),
   );
 
