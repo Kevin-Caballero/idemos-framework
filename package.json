@@ -17,12 +17,12 @@
   },
   "repos": {
     "services": {
-      "ai": "https://github.com/Kevin-Caballero/idemos-ai.git",
-      "app": "https://github.com/Kevin-Caballero/idemos-app.git",
-      "auth": "https://github.com/Kevin-Caballero/idemos-auth.git",
-      "backend": "https://github.com/Kevin-Caballero/idemos-backend.git",
-      "etl": "https://github.com/Kevin-Caballero/idemos-etl.git",
-      "gateway": "https://github.com/Kevin-Caballero/idemos-gateway.git"
+      "ai": "https://github.com/Kevin-Caballero/idemos-ai.git#develop",
+      "app": "https://github.com/Kevin-Caballero/idemos-app.git#develop",
+      "auth": "https://github.com/Kevin-Caballero/idemos-auth.git#develop",
+      "backend": "https://github.com/Kevin-Caballero/idemos-backend.git#develop",
+      "etl": "https://github.com/Kevin-Caballero/idemos-etl.git#develop",
+      "gateway": "https://github.com/Kevin-Caballero/idemos-gateway.git#develop"
     },
     "packages": {
       "common": "https://github.com/Kevin-Caballero/idemos-common.git",

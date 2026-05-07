@@ -34,14 +34,29 @@ function nextColor() {
   return PALETTE[colorIdx++ % PALETTE.length];
 }
 
+function parseUrl(raw: string): { url: string; branch?: string } {
+  const idx = raw.indexOf("#");
+  if (idx === -1) return { url: raw };
+  return { url: raw.slice(0, idx), branch: raw.slice(idx + 1) || undefined };
+}
+
 async function ensureRepo(
   label: string,
-  url: string,
+  rawUrl: string,
   dir: string,
 ): Promise<CloneResult> {
+  const { url, branch } = parseUrl(rawUrl);
+  const cloneArgs = [
+    "clone",
+    "--progress",
+    ...(branch ? ["--branch", branch] : []),
+    url,
+    dir,
+  ];
+
   if (!existsSync(dir)) {
     try {
-      await execa("git", ["clone", "--progress", url, dir], { stdio: "pipe" });
+      await execa("git", cloneArgs, { stdio: "pipe" });
       return { label, status: "cloned" };
     } catch (err: any) {
       return { label, status: "error", detail: err.stderr ?? err.message };
@@ -50,7 +65,7 @@ async function ensureRepo(
 
   if (!existsSync(`${dir}/.git`)) {
     try {
-      await execa("git", ["clone", "--progress", url, dir], { stdio: "pipe" });
+      await execa("git", cloneArgs, { stdio: "pipe" });
       return { label, status: "cloned" };
     } catch (err: any) {
       return {
@@ -80,9 +95,10 @@ async function ensureRepo(
 
   try {
     await execa("git", ["-C", dir, "fetch", "origin"], { stdio: "pipe" });
+    const pullTarget = branch ? ["origin", branch] : ["origin"];
     const { stdout } = await execa(
       "git",
-      ["-C", dir, "pull", "--ff-only", "origin"],
+      ["-C", dir, "pull", "--ff-only", ...pullTarget],
       { stdio: "pipe" },
     );
     const alreadyUpToDate =
