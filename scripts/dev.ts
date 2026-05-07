@@ -1,5 +1,5 @@
 import { execa } from "execa";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import chalk from "chalk";
 import { checkbox, select } from "@inquirer/prompts";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -268,24 +268,23 @@ async function runTerminals(selected: string[]): Promise<void> {
       const batPath = join(tmpdir(), `idemos-${name}-dev.bat`);
       writeFileSync(
         batPath,
-        [
-          "@echo off",
-          `title idemos-${name}`,
-          `cd /D "${dir}"`,
-          "npm run start:dev",
-          "",
-        ].join("\r\n"),
+        ["@echo off", `cd /D "${dir}"`, "npm run start:dev", ""].join("\r\n"),
       );
-      await new Promise<void>((resolve, reject) => {
-        const child = spawn(
-          "cmd.exe",
-          ["/c", "start", "", "/D", dir, "cmd.exe", "/k", batPath],
-          { stdio: "ignore", detached: true },
-        );
-        child.unref();
-        child.on("error", reject);
-        child.on("close", resolve);
-      });
+      const wtAvailable =
+        spawnSync("where", ["wt"], { stdio: "pipe" }).status === 0;
+      if (wtAvailable) {
+        spawn(
+          `wt -w 0 nt --title "idemos-${name}" --startingDirectory "${dir}" cmd.exe /k "${batPath}"`,
+          [],
+          { shell: true, stdio: "ignore", detached: true },
+        ).unref();
+      } else {
+        spawn(
+          `start "idemos-${name}" /D "${dir}" cmd.exe /k "${batPath}"`,
+          [],
+          { shell: true, stdio: "ignore", detached: true },
+        ).unref();
+      }
     } else {
       const xterm = `xterm -title "${name}" -e "bash -c 'cd ${dir} && npm run start:dev; exec bash'" &`;
       execa(
