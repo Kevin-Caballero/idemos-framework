@@ -18,6 +18,14 @@ function ensureServiceEnvFilesFromExamples(): void {
   );
   const created: string[] = [];
 
+  // Root .env
+  const rootEnvExamplePath = join(rootDir, ".env.example");
+  const rootEnvPath = join(rootDir, ".env");
+  if (existsSync(rootEnvExamplePath) && !existsSync(rootEnvPath)) {
+    copyFileSync(rootEnvExamplePath, rootEnvPath);
+    created.push(".env");
+  }
+
   for (const name of nestServices) {
     const serviceDir = join(rootDir, "services", name);
     if (!existsSync(serviceDir)) continue;
