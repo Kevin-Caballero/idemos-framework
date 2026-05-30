@@ -40,26 +40,26 @@ skinparam frame {
 title IDemos - System Architecture\n<size:11></size>
 
 rectangle "CLIENT  <<React Native / Expo>>" #E0F7FA {
-  component [MobileApp\n<size:10>Home · Search · Detail\nNotifications · Settings] as APP
+  component [MobileApp\n<size:10>Home · Search · Detail\nNotifications · Settings</size>] as APP
 }
 
-frame "Docker Compose  <<docker-compose.yml>>" {
+rectangle "gateway : 3000  <<BFF>>" #FCE4EC {
+  component [BffController\n<size:10>single HTTP entry point</size>] as BffCtrl
+  component [GatewayService\n<size:10>publishes to RabbitMQ\nawaits reply queue</size>] as GwSvc
+  component [AuthProxyGuard\n<size:10>validates JWT locally</size>] as APGuard
+  BffCtrl -down-> GwSvc  : delegates
+  BffCtrl ..> APGuard     : every request
+}
 
-  rectangle "gateway : 3000  <<BFF>>" #FCE4EC {
-    component [BffController\n<size:10>single HTTP entry point</size>] as BffCtrl
-    component [GatewayService\n<size:10>publishes to RabbitMQ\nawaits reply queue</size>] as GwSvc
-    component [AuthProxyGuard\n<size:10>validates JWT locally</size>] as APGuard
-    BffCtrl -down-> GwSvc   : delegates
-    BffCtrl ..> APGuard      : every request
+queue "rabbitmq : 5672  <<docker>>\n<size:10>exchanges: auth · backend · etl · ai</size>" as RMQ
+
+rectangle "MICROSERVICES  <<Node.js / NestJS>>" #F1F8E9 {
+
+  rectangle "auth" #E8F5E9 {
+    component [AuthService\n<size:10>register · login · JWT sign</size>] as AuthSvc
   }
 
-  queue "rabbitmq : 5672\n<size:10>exchanges: auth · backend · etl · ai</size>" as RMQ
-
-  rectangle "auth " #E8F5E9 {
-    component [AuthService\n<size:10>register · login\nrefresh · JWT sign ] as AuthSvc
-  }
-
-  rectangle "backend " #DCEEFB {
+  rectangle "backend" #DCEEFB {
     component [InitiativesService] as InitSvc
     component [VotesService] as VoteSvc
     component [FollowsService] as FollowSvc
@@ -68,50 +68,51 @@ frame "Docker Compose  <<docker-compose.yml>>" {
     FollowSvc -down-> NotifSvc : dispatch
   }
 
-  rectangle "ai " #F3E5F5 {
+  rectangle "ai" #F3E5F5 {
     component [AiSummaryService\n<size:10>getOrGenerate · isFresh</size>] as AISvc
-    component [LlmClient\n<size:10>wraps LLM HTTP API</size>] as LLMClient
+    component [LlmClient\n<size:10>wraps Ollama HTTP API</size>] as LLMClient
     AISvc -down-> LLMClient : prompt
   }
 
-  rectangle "etl " #FFF3E0 {
+  rectangle "etl" #FFF3E0 {
     component [EtlScheduler\n<size:10>@Cron daily</size>] as Scheduler
     component [IngestionService\n+ CongressIngestor] as Ingestor
     Scheduler -down-> Ingestor : triggers
   }
 
-  database "postgres : 5432\n<size:10>shared DB (MVP)</size>" as DB
+  AuthSvc -[hidden]right-> InitSvc
+  AuthSvc -[hidden]down->  AISvc
+  AISvc   -[hidden]right-> Scheduler
 
 }
 
+database "postgres : 5432  <<docker>>\n<size:10>shared DB (MVP)</size>" as DB
+
+component [ollama : 11434  <<docker>>\n<size:10>local LLM inference</size>] as Ollama
+
 cloud "Congreso.es\nOpenData API" as CongressAPI
-cloud "OpenAI / LLM API" as LLMAPI
 
+DB -[hidden]right-> Ollama
+Ollama -[hidden]right-> CongressAPI
 
-APP -down-> BffCtrl : HTTPS :3000
+APP     -down-> BffCtrl : HTTPS :3000
+GwSvc   -down-> RMQ     : publish request / await reply
 
-GwSvc -down-> RMQ : publish request
-RMQ -up-> GwSvc   : reply queue
+RMQ -down-> AuthSvc : auth.cmd
+RMQ -down-> InitSvc : initiatives.query
+RMQ -down-> VoteSvc : votes.cmd
+RMQ -down-> AISvc   : ai.query
 
-RMQ -down-> AuthSvc  : auth.cmd
-RMQ -down-> InitSvc  : initiatives.query
-RMQ -down-> VoteSvc  : votes.cmd
-RMQ -down-> AISvc    : ai.query
-
-Ingestor -up-> RMQ : initiative.upserted
-RMQ -down-> AISvc  : initiative.upserted
+Ingestor -up->  RMQ   : initiative.upserted
+RMQ      -down-> AISvc : initiative.upserted
 
 AuthSvc  -down-> DB : TypeORM
 InitSvc  -down-> DB : TypeORM
-VoteSvc  -[hidden]down-> NotifSvc
 NotifSvc -down-> DB : TypeORM
 AISvc    -down-> DB : TypeORM
 Ingestor -down-> DB : TypeORM
 
-Ingestor  -down-> CongressAPI : HTTP fetch
-LLMClient -down-> LLMAPI      : HTTP API
-
-DB -[hidden]down-> CongressAPI
-DB -[hidden]down-> LLMAPI
+LLMClient -down-> Ollama       : HTTP API
+Ingestor  -down-> CongressAPI  : HTTP fetch
 
 @enduml
