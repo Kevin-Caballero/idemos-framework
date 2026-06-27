@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 <a class="skip-link" href="#main">Saltar al contenido principal</a>
@@ -43,7 +43,7 @@
     <div class="container hero-grid">
       <div class="hero-copy">
         <p class="eyebrow">Trabajo Final de Grado · Ingeniería Informática</p>
-        <h1>Entender el Congreso, <span class="accent">sin leer 80 páginas de BOE.</span></h1>
+        <h1>Entiende las leyes, <span class="accent">sin leer páginas de BOE.</span></h1>
         <p class="lead">
           iDemos reúne los Proyectos y Proposiciones de Ley del Congreso de los Diputados,
           los explica en lenguaje claro y neutral con IA, y te deja votar de forma simbólica
@@ -61,24 +61,8 @@
       </div>
       <div class="hero-art" aria-hidden="true">
         <div class="phone-frame">
-          <div class="phone-screen">
-            <div class="mock-status">9:41</div>
-            <div class="mock-card">
-              <span class="mock-tag">Proyecto de Ley</span>
-              <p class="mock-title">Modificación del régimen de alquiler de vivienda habitual</p>
-              <p class="mock-meta">En Comisión · Congreso de los Diputados</p>
-              <p class="mock-summary">Resumen IA: el texto ajusta los límites de actualización de precios para contratos de larga duración…</p>
-              <div class="mock-votes">
-                <span class="vote-pill vote-yes">Sí 54%</span>
-                <span class="vote-pill vote-no">No 31%</span>
-                <span class="vote-pill vote-abs">Abst. 15%</span>
-              </div>
-            </div>
-            <div class="mock-card mock-card-ghost">
-              <span class="mock-tag mock-tag-muted">Proposición de Ley</span>
-              <p class="mock-title">Medidas de eficiencia energética en edificios públicos</p>
-              <p class="mock-meta">Pendiente de publicación</p>
-            </div>
+          <div class="phone-screen phone-screen-img">
+            <img src="assets/screen-login.png" alt="" width="270" height="600">
           </div>
         </div>
       </div>
@@ -160,35 +144,28 @@
       <p class="section-lead">Prototipo de alta fidelidad construido con React Native y Expo. Diseño Android-first, accesible y centrado en la lectura.</p>
       <div class="screens-row">
         <figure class="screen-card">
-          <div class="screen-placeholder" role="img" aria-label="Captura: pantalla de inicio con feed de iniciativas">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 4-4a3 3 0 0 1 4 0l5 5"/><circle cx="9" cy="9" r="1.5"/></svg>
-            <span>Feed de inicio</span>
-          </div>
-          <figcaption>Pantalla de inicio</figcaption>
+          <div class="screen-frame"><img class="screen-shot" src="assets/screen-feed.png" alt="Feed de Proyectos y Proposiciones de Ley en iDemos" loading="lazy" width="270" height="601"></div>
+          <figcaption>Feed de iniciativas</figcaption>
         </figure>
         <figure class="screen-card">
-          <div class="screen-placeholder" role="img" aria-label="Captura: detalle de iniciativa legislativa con resumen IA">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 4-4a3 3 0 0 1 4 0l5 5"/><circle cx="9" cy="9" r="1.5"/></svg>
-            <span>Detalle de iniciativa</span>
-          </div>
+          <div class="screen-frame"><img class="screen-shot" src="assets/screen-buscar.png" alt="Pantalla de búsqueda de iniciativas por título, expediente o tema" loading="lazy" width="270" height="601"></div>
+          <figcaption>Búsqueda</figcaption>
+        </figure>
+        <figure class="screen-card screen-card-tall">
+          <div class="screen-frame"><img class="screen-shot" src="assets/screen-detalle-full.png" alt="Detalle completo de una iniciativa: resumen IA, datos clave, tramitación, fuentes oficiales, voto ciudadano y votación parlamentaria" loading="lazy" width="1344" height="5134"></div>
           <figcaption>Detalle de iniciativa</figcaption>
         </figure>
         <figure class="screen-card">
-          <div class="screen-placeholder" role="img" aria-label="Captura: pantalla de búsqueda de iniciativas">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 4-4a3 3 0 0 1 4 0l5 5"/><circle cx="9" cy="9" r="1.5"/></svg>
-            <span>Búsqueda</span>
-          </div>
-          <figcaption>Búsqueda</figcaption>
+          <div class="screen-frame"><img class="screen-shot" src="assets/screen-notificaciones.png" alt="Pantalla de seguimiento de iniciativas" loading="lazy" width="270" height="601"></div>
+          <figcaption>Seguimientos</figcaption>
         </figure>
         <figure class="screen-card">
-          <div class="screen-placeholder" role="img" aria-label="Captura: pantalla de notificaciones">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 4-4a3 3 0 0 1 4 0l5 5"/><circle cx="9" cy="9" r="1.5"/></svg>
-            <span>Notificaciones</span>
-          </div>
-          <figcaption>Notificaciones</figcaption>
+          <div class="screen-frame"><img class="screen-shot" src="assets/screen-ajustes.png" alt="Pantalla de ajustes: cuenta, tema, idioma y guía de uso" loading="lazy" width="270" height="601"></div>
+          <figcaption>Ajustes</figcaption>
         </figure>
       </div>
-      <p class="screens-note">Sustituye estos marcadores por las capturas reales del prototipo (carpeta <code>docs/site/assets</code>).</p>
+
+      <p class="screens-note">Capturas reales tomadas en emulador Android sobre el build de desarrollo.</p>
     </div>
   </section>
 

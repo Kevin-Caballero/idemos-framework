@@ -1,5 +1,6 @@
 import { execa } from "execa";
 import { spawn, spawnSync } from "node:child_process";
+import { createServer } from "node:net";
 import chalk from "chalk";
 import { checkbox, select } from "@inquirer/prompts";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -47,6 +48,59 @@ const SERVICE_COLORS: Record<string, (s: string) => string> = {
 const COMPOSE_INFRA = "docker/docker-compose.infra.yml";
 const COMPOSE_GPU = "docker/docker-compose.dev.gpu.yml";
 const DEFAULT_AI_MODEL = "gemma3:4b";
+
+function isServiceReadyLine(line: string): boolean {
+  return (
+    line.includes("Nest application successfully started") ||
+    line.includes("Nest microservice successfully started")
+  );
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function assertPortAvailable(
+  port: number,
+  serviceName: string,
+): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const server = createServer();
+
+    server.once("error", (error: NodeJS.ErrnoException) => {
+      if (error.code === "EADDRINUSE") {
+        reject(
+          new Error(
+            `${serviceName} needs port ${port}, but it is already in use. Stop the existing process or change ${serviceName}'s PORT before running dev.`,
+          ),
+        );
+        return;
+      }
+
+      reject(error);
+    });
+
+    server.once("listening", () => {
+      server.close((closeError) => {
+        if (closeError) {
+          reject(closeError);
+          return;
+        }
+        resolve();
+      });
+    });
+
+    server.listen(port, "0.0.0.0");
+  });
+}
+
+async function runPreflightChecks(selected: string[]): Promise<void> {
+  if (!selected.includes("gateway")) return;
+
+  const env = loadRootEnv(rootDir);
+  const gatewayPort = Number(env.GATEWAY_PORT ?? "3100");
+  await assertPortAvailable(gatewayPort, "gateway");
+}
 
 async function waitForPostgres(
   maxTries = 30,
@@ -235,17 +289,41 @@ async function runProcess(selected: string[]): Promise<void> {
     });
     spawned.push(proc);
 
-    proc.stdout?.on("data", (d: Buffer) => {
-      for (const line of d.toString().split("\n")) {
-        if (line.trim()) process.stdout.write(`  ${prefix}  ${line}\n`);
-      }
-    });
-    proc.stderr?.on("data", (d: Buffer) => {
-      for (const line of d.toString().split("\n")) {
-        if (line.trim()) process.stderr.write(`  ${prefix}  ${line}\n`);
-      }
+    let ready = false;
+    const readyPromise = new Promise<void>((resolve, reject) => {
+      const markReady = (line: string) => {
+        if (ready || !isServiceReadyLine(line)) return;
+        ready = true;
+        resolve();
+      };
+
+      proc.stdout?.on("data", (d: Buffer) => {
+        for (const line of d.toString().split("\n")) {
+          if (line.trim()) process.stdout.write(`  ${prefix}  ${line}\n`);
+          markReady(line);
+        }
+      });
+
+      proc.stderr?.on("data", (d: Buffer) => {
+        for (const line of d.toString().split("\n")) {
+          if (line.trim()) process.stderr.write(`  ${prefix}  ${line}\n`);
+          markReady(line);
+        }
+      });
+
+      proc.catch((error) => {
+        if (!ready) reject(error);
+      });
     });
     proc.catch(() => {});
+
+    try {
+      await Promise.race([readyPromise, wait(20_000)]);
+    } catch (error) {
+      throw new Error(
+        `${name} failed during startup: ${(error as Error).message}`,
+      );
+    }
   }
 
   console.log(
@@ -298,6 +376,7 @@ async function runTerminals(selected: string[]): Promise<void> {
     }
 
     console.log(chalk.green(`  ✓ ${name}`));
+    await wait(3_000);
   }
 
   console.log(chalk.gray("\n  Services started in separate windows.\n"));
@@ -353,6 +432,8 @@ async function main(): Promise<void> {
     console.log(chalk.yellow("  No services selected. Exiting."));
     return;
   }
+
+  await runPreflightChecks(selected);
 
   switch (mode) {
     case "process":
