@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>iDemos — Democracia informada</title>
+<meta name="description" content="iDemos acerca la actividad legislativa española a la ciudadanía: feed de leyes, resúmenes con IA neutrales y voto ciudadano no vinculante." />
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Saltar al contenido principal</a>
+
+<header class="site-header">
+  <div class="container header-row">
+    <a class="brand" href="#top">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      iDemos
+    </a>
+    <nav class="main-nav" aria-label="Navegación principal">
+      <a href="#problema">El problema</a>
+      <a href="#funciones">Funciones</a>
+      <a href="#capturas">Capturas</a>
+      <a href="#arquitectura">Arquitectura</a>
+      <a href="#proyecto">Proyecto</a>
+    </nav>
+    <a class="btn btn-ghost header-cta" href="https://github.com/Kevin-Caballero/idemos-framework" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      Ver en GitHub
+    </a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Trabajo Final de Grado · Ingeniería Informática</p>
+        <h1>Entender el Congreso, <span class="accent">sin leer 80 páginas de BOE.</span></h1>
+        <p class="lead">
+          iDemos reúne los Proyectos y Proposiciones de Ley del Congreso de los Diputados,
+          los explica en lenguaje claro y neutral con IA, y te deja votar de forma simbólica
+          para comparar tu opinión con la de tus representantes.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://github.com/Kevin-Caballero/idemos-framework" target="_blank" rel="noopener">Explorar el repositorio</a>
+          <a class="btn btn-secondary" href="#funciones">Ver qué hace</a>
+        </div>
+        <dl class="hero-stats" aria-label="Datos del proyecto">
+          <div><dt>Origen de datos</dt><dd>Congreso de los Diputados</dd></div>
+          <div><dt>Plataforma</dt><dd>Android (React Native / Expo)</dd></div>
+          <div><dt>Arquitectura</dt><dd>5 microservicios</dd></div>
+        </dl>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="mock-status">9:41</div>
+            <div class="mock-card">
+              <span class="mock-tag">Proyecto de Ley</span>
+              <p class="mock-title">Modificación del régimen de alquiler de vivienda habitual</p>
+              <p class="mock-meta">En Comisión · Congreso de los Diputados</p>
+              <p class="mock-summary">Resumen IA: el texto ajusta los límites de actualización de precios para contratos de larga duración…</p>
+              <div class="mock-votes">
+                <span class="vote-pill vote-yes">Sí 54%</span>
+                <span class="vote-pill vote-no">No 31%</span>
+                <span class="vote-pill vote-abs">Abst. 15%</span>
+              </div>
+            </div>
+            <div class="mock-card mock-card-ghost">
+              <span class="mock-tag mock-tag-muted">Proposición de Ley</span>
+              <p class="mock-title">Medidas de eficiencia energética en edificios públicos</p>
+              <p class="mock-meta">Pendiente de publicación</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEMA -->
+  <section class="section" id="problema">
+    <div class="container narrow">
+      <h2>La información es pública, pero inaccesible</h2>
+      <p class="section-lead">
+        La actividad legislativa española es de acceso público, pero está dispersa en distintas
+        fuentes oficiales, redactada en documentos largos y con lenguaje jurídico poco accesible.
+        El resultado: la mayoría de la ciudadanía solo se informa a través de titulares o resúmenes
+        de terceros, y termina percibiendo la política como algo lejano.
+      </p>
+      <div class="problem-grid">
+        <div class="problem-item">
+          <svg class="problem-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <h3>Dispersión</h3>
+          <p>Cada iniciativa vive en un boletín, una web o un PDF distinto del Congreso.</p>
+        </div>
+        <div class="problem-item">
+          <svg class="problem-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <h3>Lenguaje jurídico</h3>
+          <p>Textos largos y técnicos que pocas personas tienen tiempo o formación para leer.</p>
+        </div>
+        <div class="problem-item">
+          <svg class="problem-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+          <h3>Desinformación de segunda mano</h3>
+          <p>Sin fuentes claras, la opinión se forma con titulares en vez de con el texto real.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FUNCIONES -->
+  <section class="section section-alt" id="funciones">
+    <div class="container">
+      <h2>Qué hace iDemos</h2>
+      <p class="section-lead">Cuatro piezas que conectan los datos oficiales del Congreso con una experiencia clara para cualquier persona.</p>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
+          </div>
+          <h3>Feed legislativo actualizado</h3>
+          <p>Proyectos y Proposiciones de Ley extraídos directamente de fuentes oficiales del Congreso de los Diputados, ordenados y siempre al día.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 4v6"/></svg>
+          </div>
+          <h3>Ficha de tramitación</h3>
+          <p>Cada iniciativa muestra su estado actual, fechas relevantes y enlaces directos a las fuentes oficiales para garantizar trazabilidad.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a4 4 0 0 0-4 4v1a5 5 0 0 0-3 4.58V14a5 5 0 0 0 5 5h.5"/><path d="M12 2a4 4 0 0 1 4 4v1a5 5 0 0 1 3 4.58V14a5 5 0 0 1-5 5h-.5"/><path d="M9 18v2"/><path d="M15 18v2"/></svg>
+          </div>
+          <h3>Resumen con IA neutral</h3>
+          <p>Un módulo de IA configurado para minimizar lenguaje valorativo y sesgos genera explicaciones breves y comprensibles de cada texto.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon-wrap">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <h3>Voto ciudadano y comparación</h3>
+          <p>Vota sí, no o abstención de forma no vinculante y, cuando hay datos disponibles, compara tu voto con el resultado real en el Congreso.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPTURAS -->
+  <section class="section" id="capturas">
+    <div class="container">
+      <h2>La app, pantalla a pantalla</h2>
+      <p class="section-lead">Prototipo de alta fidelidad construido con React Native y Expo. Diseño Android-first, accesible y centrado en la lectura.</p>
+      <div class="screens-row">
+        <figure class="screen-card">
+          <div class="screen-placeholder" role="img" aria-label="Captura: pantalla de inicio con feed de iniciativas">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 4-4a3 3 0 0 1 4 0l5 5"/><circle cx="9" cy="9" r="1.5"/></svg>
+            <span>Feed de inicio</span>
+          </div>
+          <figcaption>Pantalla de inicio</figcaption>
+        </figure>
+        <figure class="screen-card">
+          <div class="screen-placeholder" role="img" aria-label="Captura: detalle de iniciativa legislativa con resumen IA">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 4-4a3 3 0 0 1 4 0l5 5"/><circle cx="9" cy="9" r="1.5"/></svg>
+            <span>Detalle de iniciativa</span>
+          </div>
+          <figcaption>Detalle de iniciativa</figcaption>
+        </figure>
+        <figure class="screen-card">
+          <div class="screen-placeholder" role="img" aria-label="Captura: pantalla de búsqueda de iniciativas">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 4-4a3 3 0 0 1 4 0l5 5"/><circle cx="9" cy="9" r="1.5"/></svg>
+            <span>Búsqueda</span>
+          </div>
+          <figcaption>Búsqueda</figcaption>
+        </figure>
+        <figure class="screen-card">
+          <div class="screen-placeholder" role="img" aria-label="Captura: pantalla de notificaciones">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 4-4a3 3 0 0 1 4 0l5 5"/><circle cx="9" cy="9" r="1.5"/></svg>
+            <span>Notificaciones</span>
+          </div>
+          <figcaption>Notificaciones</figcaption>
+        </figure>
+      </div>
+      <p class="screens-note">Sustituye estos marcadores por las capturas reales del prototipo (carpeta <code>docs/site/assets</code>).</p>
+    </div>
+  </section>
+
+  <!-- ARQUITECTURA -->
+  <section class="section section-alt" id="arquitectura">
+    <div class="container">
+      <h2>Arquitectura de microservicios</h2>
+      <p class="section-lead">Backend desacoplado pensado para escalar la ingesta de datos legislativos y el procesado con IA de forma independiente.</p>
+
+      <div class="arch-diagram" role="img" aria-label="Diagrama: app móvil conecta con un Gateway, que distribuye peticiones a Auth-Service, Backend-Service, AI-Service y ETL-Service; estos usan PostgreSQL y RabbitMQ y el ETL consume datos del Congreso de los Diputados">
+        <div class="arch-row arch-row-top">
+          <div class="arch-node arch-node-client">App móvil<br><span>React Native · Expo</span></div>
+        </div>
+        <div class="arch-connector" aria-hidden="true"></div>
+        <div class="arch-row">
+          <div class="arch-node arch-node-gateway">Gateway<br><span>Punto único de entrada HTTP</span></div>
+        </div>
+        <div class="arch-connector arch-connector-wide" aria-hidden="true"></div>
+        <div class="arch-row arch-row-services">
+          <div class="arch-node">Auth-Service</div>
+          <div class="arch-node">Backend-Service</div>
+          <div class="arch-node">AI-Service</div>
+          <div class="arch-node">ETL-Service</div>
+        </div>
+        <div class="arch-connector arch-connector-wide" aria-hidden="true"></div>
+        <div class="arch-row arch-row-infra">
+          <div class="arch-node arch-node-infra">PostgreSQL 16</div>
+          <div class="arch-node arch-node-infra">RabbitMQ</div>
+          <div class="arch-node arch-node-infra">Congreso de los Diputados<br><span>fuente de datos</span></div>
+        </div>
+      </div>
+
+      <div class="stack-grid">
+        <div class="stack-item">
+          <h3>App</h3>
+          <p>React Native + Expo, NativeWind, TanStack Query, Zustand.</p>
+        </div>
+        <div class="stack-item">
+          <h3>Backend</h3>
+          <p>NestJS sobre microservicios, comunicación vía RabbitMQ.</p>
+        </div>
+        <div class="stack-item">
+          <h3>Datos</h3>
+          <p>PostgreSQL 16 con migraciones gestionadas por TypeORM.</p>
+        </div>
+        <div class="stack-item">
+          <h3>Infraestructura</h3>
+          <p>Contenedores Docker, despliegue continuo en Railway.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROYECTO / CTA -->
+  <section class="section cta-section" id="proyecto">
+    <div class="container narrow cta-content">
+      <h2>Un TFG para acercar el Congreso a la ciudadanía</h2>
+      <p>
+        iDemos es el Trabajo Final de Grado de Kevin Caballero Cedillo, Grado de Ingeniería
+        Informática (Software) — Desarrollo de aplicaciones para dispositivos móviles, dirigido
+        por Marta Gatnau Sarret. El nombre combina "inteligente" con "dēmos" (pueblo, raíz de
+        "democracia").
+      </p>
+      <div class="hero-actions cta-actions">
+        <a class="btn btn-primary" href="https://github.com/Kevin-Caballero/idemos-framework" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          Ver código en GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-row">
+    <p>© 2026 iDemos · Kevin Caballero Cedillo</p>
+    <a href="https://github.com/Kevin-Caballero/idemos-framework" target="_blank" rel="noopener">github.com/Kevin-Caballero/idemos-framework</a>
+  </div>
+</footer>
+
+</body>
+</html>
